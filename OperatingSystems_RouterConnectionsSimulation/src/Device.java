@@ -5,11 +5,13 @@ public class Device extends Thread{
 	private String mType;
 	private Network mConnection;
 	private Router mRouter;
+	private OutputForm mOut;
 	
-	public Device(String name, String type, Router router) {
+	public Device(String name, String type, Router router, OutputForm out) {
 		this.mName = name;
 		this.mType = type;
 		this.mRouter = router;
+		this.mOut = out;
 	}
 	
 	public void setConnection(Network connection) {this.mConnection = connection;}
@@ -17,8 +19,8 @@ public class Device extends Thread{
 	
 	public void run() {
 		this.mRouter.reserve(this);
-		System.out.println("(" + mType + ") " + mName + " arrived.");
-		
+		System.out.println("[" + mType + "] " + mName + " arrived.");
+		this.mOut.addUpdates("[" + mType + "] " + mName + " arrived."+"\n");
 		try {
 			this.mRouter.getSemaphore().acquire();
 		} catch (InterruptedException exception) {
@@ -27,12 +29,14 @@ public class Device extends Thread{
 		
 		this.mRouter.connectToNetwork(this);           
 		System.out.println("Connection " + mConnection.getConnection() + " : " + mName + " occupied");
+		this.mOut.addUpdates("Connection " + mConnection.getConnection() + " : " + mName + " occupied"+"\n");
 		delay();
 		System.out.println("Connection " + mConnection.getConnection() + " : " + mName + " performs online activity");
+		this.mOut.addUpdates("Connection " + mConnection.getConnection() + " : " + mName + " performs online activity"+"\n");
 		delay();
 		System.out.println("Connection " + mConnection.getConnection() + " : " + mName + " log out.");
-		mRouter.logOut(this)
-		;
+		this.mOut.addUpdates("Connection " + mConnection.getConnection() + " : " + mName + " log out."+"\n");
+		mRouter.logOut(this);
 		this.mRouter.getSemaphore().release();
 	}
 	
